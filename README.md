@@ -1,2 +1,1 @@
-Shared libraries used in Softcorp projects.
-
+Shared libraries used in Softcorp projects. Use at your own risk.
