@@ -18,19 +18,25 @@ func (c *defaultCrypto) CombineSymmetricKeys(keys []string, level int) (string, 
 		return keys[0], nil
 	}
 	// validate length is the same
-	initialKey := keys[0]
+	key, err := hex.DecodeString(keys[0])
+	if err != nil {
+		return "", err
+	}
+	initialKey := string(key)
 	for i := 1; i < level; i++ {
 		if len(keys[i]) != 64 {
 			return "", fmt.Errorf("invalid key size: %d", len(keys[i]))
 		}
-		key := keys[i]
-		// perform the xor operation
-		n := len(initialKey) / 2
-		b := make([]byte, n)
-		for i := 0; i < n; i++ {
-			b[i] = initialKey[i] ^ key[i]
+		key, err := hex.DecodeString(keys[i])
+		if err != nil {
+			return "", err
 		}
-		initialKey = string(b)
+		currentKey := string(key)
+		newKey := []byte{}
+		for j := range initialKey {
+			newKey = append(newKey, initialKey[j]^currentKey[j])
+		}
+		initialKey = string(newKey)
 	}
 	newKey := hex.EncodeToString([]byte(initialKey))
 	if len(newKey) != 64 {
