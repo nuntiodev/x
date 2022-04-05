@@ -11,6 +11,11 @@ func (c *defaultCrypto) CombineSymmetricKeys(keys []string, level int) (string, 
 		return "", errors.New("invalid number of keys 0")
 	} else if level > len(keys) {
 		return "", errors.New("level cannot be larger than amount of encryption keys")
+	} else if level <= 0 {
+		return "", errors.New("level cannot be less than 0")
+	}
+	if len(keys) == 1 && level == 1 {
+		return keys[0], nil
 	}
 	// validate length is the same
 	initialKey := keys[0]
