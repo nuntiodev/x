@@ -39,13 +39,15 @@ func TestEncryptDecryptWithCombinedKeys(t *testing.T) {
 	assert.NoError(t, err)
 	keyThree, err := c.GenerateSymmetricKey(32, AlphaNum)
 	assert.NoError(t, err)
-	key, err := c.CombineSymmetricKeys([]string{keyOne, keyTwo, keyThree})
+	key, err := c.CombineSymmetricKeys([]string{keyOne, keyTwo, keyThree}, 2)
 	assert.NoError(t, err)
 	// encrypt
 	ciphertext, err := c.Encrypt(plaintext, key)
 	assert.NoError(t, err)
 	assert.NotEqual(t, plaintext, ciphertext)
-	// decrypt
+	// decrypt - make sure we can generate the same key and decrypt
+	key, err = c.CombineSymmetricKeys([]string{keyOne, keyTwo, keyThree}, 2)
+	assert.NoError(t, err)
 	decryptedCiphertext, err := c.Decrypt(ciphertext, key)
 	assert.NoError(t, err)
 	assert.Equal(t, plaintext, decryptedCiphertext)

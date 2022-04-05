@@ -13,7 +13,7 @@ const (
 type Crypto interface {
 	GenerateRsaKeyPair(length int) (*rsa.PrivateKey, *rsa.PublicKey, error)
 	GenerateSymmetricKey(length int, runes int) (string, error)
-	CombineSymmetricKeys(keys []string) (string, error)
+	CombineSymmetricKeys(keys []string, level int) (string, error)
 	Encrypt(stringToEncrypt string, keyString string) (string, error)
 	Decrypt(encryptedString string, keyString string) (string, error)
 }

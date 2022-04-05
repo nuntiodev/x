@@ -6,13 +6,15 @@ import (
 	"fmt"
 )
 
-func (c *defaultCrypto) CombineSymmetricKeys(keys []string) (string, error) {
+func (c *defaultCrypto) CombineSymmetricKeys(keys []string, level int) (string, error) {
 	if len(keys) == 0 {
 		return "", errors.New("invalid number of keys 0")
+	} else if level > len(keys) {
+		return "", errors.New("level cannot be larger than amount of encryption keys")
 	}
 	// validate length is the same
 	initialKey := keys[0]
-	for i := 1; i < len(keys); i++ {
+	for i := 1; i < level; i++ {
 		key := keys[i]
 		// perform the xor operation
 		n := len(initialKey) / 2
