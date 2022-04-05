@@ -33,6 +33,8 @@ func (c *defaultCrypto) CombineSymmetricKeys(keys []string, level int) (string, 
 		initialKey = string(b)
 	}
 	newKey := hex.EncodeToString([]byte(initialKey))
-	fmt.Print(len([]byte(newKey)))
+	if len(newKey) != 64 {
+		return "", errors.New("invalid length: %d", len(newKey))
+	}
 	return newKey, nil
 }
