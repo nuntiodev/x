@@ -17,10 +17,6 @@ func (c *defaultCrypto) CombineSymmetricKeys(keys []string, level int) (string, 
 	if len(keys) == 1 && level == 1 {
 		return keys[0], nil
 	}
-	// reverse array
-	for i, j := 0, len(keys)-1; i < j; i, j = i+1, j-1 {
-		keys[i], keys[j] = keys[j], keys[i]
-	}
 	// validate length is the same
 	key, err := hex.DecodeString(keys[0])
 	if err != nil {
