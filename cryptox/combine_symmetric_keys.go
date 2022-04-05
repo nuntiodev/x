@@ -20,6 +20,9 @@ func (c *defaultCrypto) CombineSymmetricKeys(keys []string, level int) (string, 
 	// validate length is the same
 	initialKey := keys[0]
 	for i := 1; i < level; i++ {
+		if len(keys[i]) != 64 {
+			return "", fmt.Errorf("invalid key size: %d", len(keys[i]))
+		}
 		key := keys[i]
 		// perform the xor operation
 		n := len(initialKey) / 2
