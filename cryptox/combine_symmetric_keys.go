@@ -31,7 +31,6 @@ func (c *defaultCrypto) CombineSymmetricKeys(keys []string, level int) (string, 
 			b[i] = initialKey[i] ^ key[i]
 		}
 		initialKey = string(b)
-		fmt.Println(len(initialKey))
 	}
 	return hex.EncodeToString([]byte(initialKey)), nil
 }
