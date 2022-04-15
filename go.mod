@@ -1,4 +1,4 @@
-module github.com/nuntio-io/x
+module github.com/nuntiodev/x
 
 go 1.17
 

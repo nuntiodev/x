@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 
-	"github.com/nuntio-io/x/repositoryx/mongo_client"
+	"github.com/nuntiodev/x/repositoryx/mongo_client"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 )
