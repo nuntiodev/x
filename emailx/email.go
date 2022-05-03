@@ -3,6 +3,7 @@ package emailx
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"html/template"
 	"net/smtp"
@@ -32,6 +33,10 @@ func New(smtpFrom, smtpPassword, smtpHost, smtpPort string) (Email, error) {
 
 func (e *defaultEmail) SendEmail(to, subject, templatePath string, data any) error {
 	if templatePath == "" {
+		// you either have to specify a template or valid data
+		if data == nil || data == "" {
+			return errors.New("data must contain some information")
+		}
 		// convert to bytes
 		var buffer bytes.Buffer        // Stand-in for a network connection
 		enc := gob.NewEncoder(&buffer) // Will write to network.
