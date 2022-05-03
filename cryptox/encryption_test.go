@@ -41,7 +41,7 @@ func TestInvalidEncryptionLevel(t *testing.T) {
 func TestEncryptDecryptWithCombinedKeys(t *testing.T) {
 	plaintext := "SomeVeryLongPlainTextWithSp€cialCharsAndNumb3rs"
 	c, err := New()
-	// combine 3 keys into
+	// create 4 encryption keys
 	keyOne, err := c.GenerateSymmetricKey(32, AlphaNum)
 	assert.NoError(t, err)
 	keyTwo, err := c.GenerateSymmetricKey(32, AlphaNum)
@@ -50,6 +50,7 @@ func TestEncryptDecryptWithCombinedKeys(t *testing.T) {
 	assert.NoError(t, err)
 	keyFour, err := c.GenerateSymmetricKey(32, AlphaNum)
 	assert.NoError(t, err)
+	// combine the first 3 encryption keys into a new encryption key
 	key, err := c.CombineSymmetricKeys([]string{keyOne, keyTwo, keyThree, keyFour}, 3)
 	assert.NoError(t, err)
 	// encrypt
