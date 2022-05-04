@@ -2,6 +2,7 @@ package emailx
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -59,8 +60,42 @@ func (e *defaultEmail) SendEmail(to, subject, templatePath string, data any) err
 	if err := t.Execute(&body, data); err != nil {
 		return err
 	}
-	if err := smtp.SendMail(e.host+":"+e.port, e.auth, e.from, []string{to}, body.Bytes()); err != nil {
+
+	// TLS config
+	tlsconfig := &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         e.host,
+	}
+	conn, err := tls.Dial("tcp", e.host+":"+e.port, tlsconfig)
+	if err != nil {
 		return err
 	}
+	c, err := smtp.NewClient(conn, e.host)
+	if err != nil {
+		return err
+	}
+	if err = c.Auth(e.auth); err != nil {
+		return err
+	}
+	if err = c.Mail(e.from); err != nil {
+		return err
+	}
+	if err = c.Rcpt(to); err != nil {
+		return err
+	}
+	w, err := c.Data()
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(body.Bytes())
+	if err != nil {
+		return err
+	}
+
+	err = w.Close()
+	if err != nil {
+		return err
+	}
+	c.Quit()
 	return nil
 }
