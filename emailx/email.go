@@ -55,7 +55,7 @@ func (e *defaultEmail) SendEmail(to, subject, templatePath string, data any) err
 	t, _ := template.ParseFiles(templatePath)
 	var body bytes.Buffer
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	body.Write([]byte(fmt.Sprintf("Subject: %s \n%s\n\n", subject, mimeHeaders)))
+	body.Write([]byte(fmt.Sprintf("Subject: %s \n From: %s \n%s\n\n", subject, e.from, mimeHeaders)))
 	if err := t.Execute(&body, data); err != nil {
 		return err
 	}
