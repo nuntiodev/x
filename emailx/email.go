@@ -68,13 +68,16 @@ func (e *defaultEmail) SendEmail(to, subject, templatePath string, data any) err
 	}
 	conn, err := tls.Dial("tcp", e.host+":"+e.port, tlsconfig)
 	if err != nil {
+		fmt.Println("err is here")
 		return err
 	}
 	c, err := smtp.NewClient(conn, e.host)
 	if err != nil {
+		fmt.Println("err is here 1")
 		return err
 	}
 	if err = c.Auth(e.auth); err != nil {
+		fmt.Println("err is here 2")
 		return err
 	}
 	if err = c.Mail(e.from); err != nil {
