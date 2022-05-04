@@ -1,6 +1,8 @@
 package cryptox
 
 import (
+	"encoding/hex"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -97,4 +99,14 @@ func TestKeyGenInvalidRunes(t *testing.T) {
 	key, err := c.GenerateSymmetricKey(0, 1000)
 	assert.Error(t, err)
 	assert.Empty(t, key)
+}
+
+func TestGenerateNumberKey(t *testing.T) {
+	c, err := New()
+	key, err := c.GenerateSymmetricKey(Numeric, 6)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, key)
+	dec, err := hex.DecodeString(key)
+	assert.NoError(t, err)
+	fmt.Println(string(dec))
 }

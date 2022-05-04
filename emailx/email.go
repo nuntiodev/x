@@ -14,20 +14,18 @@ type Email interface {
 }
 
 type defaultEmail struct {
-	auth     smtp.Auth
-	from     string
-	password string
-	port     string
-	host     string
+	auth smtp.Auth
+	from string
+	port string
+	host string
 }
 
-func New(smtpFrom, smtpPassword, smtpHost, smtpPort string) (Email, error) {
+func New(smtpFrom, smtpPassword, smtpHost, smtpPort string, auth smtp.Auth) (Email, error) {
 	return &defaultEmail{
-		auth:     smtp.PlainAuth("", smtpFrom, smtpPassword, smtpHost),
-		from:     smtpFrom,
-		password: smtpPassword,
-		host:     smtpHost,
-		port:     smtpPort,
+		auth: auth,
+		from: smtpFrom,
+		host: smtpHost,
+		port: smtpPort,
 	}, nil
 }
 
