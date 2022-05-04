@@ -20,7 +20,7 @@ type defaultEmail struct {
 	host string
 }
 
-func New(smtpFrom, smtpPassword, smtpHost, smtpPort string, auth smtp.Auth) (Email, error) {
+func New(smtpFrom, smtpHost, smtpPort string, auth smtp.Auth) (Email, error) {
 	return &defaultEmail{
 		auth: auth,
 		from: smtpFrom,
