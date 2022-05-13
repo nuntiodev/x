@@ -69,8 +69,6 @@ func (e *defaultEmail) SendEmail(to, subject, templatePath string, data any) err
 	conn, err := tls.Dial("tcp", e.host+":"+e.port, tlsconfig)
 	if err != nil {
 		fmt.Println(e.host + ":" + e.port)
-		fmt.Print(e.host)
-		fmt.Print(e.port)
 		return err
 	}
 	c, err := smtp.NewClient(conn, e.host)
