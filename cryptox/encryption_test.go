@@ -186,6 +186,10 @@ func TestEncryptDecryptOnlyInternal(t *testing.T) {
 		assert.Equal(t, int32(0), complexStruct.Four.ExternalEncryptionLevel)
 		assert.Equal(t, int32(2), complexStruct.Five.InternalEncryptionLevel)
 		assert.Equal(t, int32(0), complexStruct.Five.ExternalEncryptionLevel)
+		// test get encryption level
+		internal, external := c.EncryptionLevel(complexStruct)
+		assert.Equal(t, int32(2), internal)
+		assert.Equal(t, int32(0), external)
 	}
 }
 

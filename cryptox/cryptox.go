@@ -14,6 +14,7 @@ type Crypto interface {
 	Encrypt(enc interface{}) error
 	Decrypt(dec interface{}) error
 	Upgradeble(val interface{}) (bool, error)
+	EncryptionLevel(val interface{}) (int32, int32)
 	SetInternalEncryptionKeys(keys []string) error
 	SetExternalEncryptionKeys(keys []string) error
 	GetInternalEncryptionKeys() ([]string, string)
