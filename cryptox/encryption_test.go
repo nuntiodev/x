@@ -20,7 +20,7 @@ type ComplexStruct struct {
 }
 
 /*
-TestEncryptDecrypt generates all allowed keys and encrypts/decrypts the plaintext and makes sure the result is the same.
+	TestEncryptDecrypt generates all allowed keys and encrypts/decrypts the plaintext and makes sure the result is the same.
 */
 func TestEncryptDecrypt(t *testing.T) {
 	for runes, _ := range allowedRunes {
@@ -104,6 +104,82 @@ func TestEncryptDecrypt(t *testing.T) {
 		assert.Equal(t, int32(2), complexStruct.Five.InternalEncryptionLevel)
 		assert.Equal(t, int32(2), complexStruct.Five.ExternalEncryptionLevel)
 	}
+}
+
+/*
+	TestEncryptDecryptNoKeys makes sure we do not throw an errror when encrypting/decrypting without keys
+*/
+func TestEncryptDecryptNoKeys(t *testing.T) {
+	// setup cryptox
+	c, err := New([]string{}, []string{})
+	assert.NoError(t, err)
+	// create complex struct to encrypt
+	test1 := "Test 1"
+	test2 := int32(2)
+	heyo1 := "Heyo1"
+	heyo2 := "Heyo2"
+	heyo3 := "Heyo3"
+	heyo4 := "Heyo4"
+	complexStruct := &ComplexStruct{
+		One: test1,
+		Two: test2,
+		Three: &InnerStruct{
+			One: Stringx{Body: heyo1},
+			Two: &Stringx{Body: heyo2},
+		},
+		Four: &Stringx{Body: heyo3},
+		Five: Stringx{Body: heyo4},
+	}
+	// encrypt
+	assert.NoError(t, c.Encrypt(complexStruct))
+	// assert not equal to original one
+	assert.Equal(t, test1, complexStruct.One)
+	assert.Equal(t, test2, complexStruct.Two)
+	assert.Equal(t, heyo1, complexStruct.Three.One.Body)
+	assert.Equal(t, heyo2, complexStruct.Three.Two.Body)
+	assert.Equal(t, heyo3, complexStruct.Four.Body)
+	assert.Equal(t, heyo4, complexStruct.Five.Body)
+	assert.Equal(t, int32(0), complexStruct.Three.One.InternalEncryptionLevel)
+	assert.Equal(t, int32(0), complexStruct.Three.One.ExternalEncryptionLevel)
+	assert.Equal(t, int32(0), complexStruct.Three.Two.InternalEncryptionLevel)
+	assert.Equal(t, int32(0), complexStruct.Three.Two.ExternalEncryptionLevel)
+	assert.Equal(t, int32(0), complexStruct.Four.InternalEncryptionLevel)
+	assert.Equal(t, int32(0), complexStruct.Four.ExternalEncryptionLevel)
+	assert.Equal(t, int32(0), complexStruct.Five.InternalEncryptionLevel)
+	assert.Equal(t, int32(0), complexStruct.Five.ExternalEncryptionLevel)
+	// decrypt
+	// insert new external and external key
+	key, err := GenerateSymmetricKey(32, AlphaLowerNum)
+	assert.NoError(t, err)
+	assert.NoError(t, c.SetInternalEncryptionKeys([]string{key}))
+	assert.NoError(t, c.SetExternalEncryptionKeys([]string{key}))
+	assert.NoError(t, err)
+	assert.NoError(t, c.Decrypt(complexStruct))
+	assert.Equal(t, test1, complexStruct.One)
+	assert.Equal(t, test2, complexStruct.Two)
+	assert.Equal(t, heyo1, complexStruct.Three.One.Body)
+	assert.Equal(t, heyo2, complexStruct.Three.Two.Body)
+	assert.Equal(t, heyo3, complexStruct.Four.Body)
+	assert.Equal(t, heyo4, complexStruct.Five.Body)
+	// encrypt again with and check that level is upgraded
+	upgradable, err := c.Upgradeble(complexStruct)
+	assert.NoError(t, err)
+	assert.True(t, upgradable)
+	assert.NoError(t, c.Encrypt(complexStruct))
+	assert.Equal(t, test1, complexStruct.One)
+	assert.Equal(t, test2, complexStruct.Two)
+	assert.NotEqual(t, heyo1, complexStruct.Three.One.Body)
+	assert.NotEqual(t, heyo2, complexStruct.Three.Two.Body)
+	assert.NotEqual(t, heyo3, complexStruct.Four.Body)
+	assert.NotEqual(t, heyo4, complexStruct.Five.Body)
+	assert.Equal(t, int32(1), complexStruct.Three.One.InternalEncryptionLevel)
+	assert.Equal(t, int32(1), complexStruct.Three.One.ExternalEncryptionLevel)
+	assert.Equal(t, int32(1), complexStruct.Three.Two.InternalEncryptionLevel)
+	assert.Equal(t, int32(1), complexStruct.Three.Two.ExternalEncryptionLevel)
+	assert.Equal(t, int32(1), complexStruct.Four.InternalEncryptionLevel)
+	assert.Equal(t, int32(1), complexStruct.Four.ExternalEncryptionLevel)
+	assert.Equal(t, int32(1), complexStruct.Five.InternalEncryptionLevel)
+	assert.Equal(t, int32(1), complexStruct.Five.ExternalEncryptionLevel)
 }
 
 /*

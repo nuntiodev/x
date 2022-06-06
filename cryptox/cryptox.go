@@ -66,25 +66,29 @@ func New(iKeys, eKeys []string) (Crypto, error) {
 		iKeys: iKeys,
 		eKeys: eKeys,
 	}
-	iKey, err := CombineSymmetricKeys(iKeys, len(iKeys))
-	if err != nil {
-		return nil, err
+	if len(iKeys) > 0 {
+		iKey, err := CombineSymmetricKeys(iKeys, len(iKeys))
+		if err != nil {
+			return nil, err
+		}
+		//Since the key is in string, we need to convert decode it to bytes
+		internlKey, err := hex.DecodeString(iKey)
+		if err != nil {
+			return nil, err
+		}
+		c.iKey = internlKey
 	}
-	//Since the key is in string, we need to convert decode it to bytes
-	internlKey, err := hex.DecodeString(iKey)
-	if err != nil {
-		return nil, err
+	if len(eKeys) > 0 {
+		eKey, err := CombineSymmetricKeys(eKeys, len(eKeys))
+		if err != nil {
+			return nil, err
+		}
+		//Since the key is in string, we need to convert decode it to bytes
+		externalKey, err := hex.DecodeString(eKey)
+		if err != nil {
+			return nil, err
+		}
+		c.eKey = externalKey
 	}
-	c.iKey = internlKey
-	eKey, err := CombineSymmetricKeys(eKeys, len(eKeys))
-	if err != nil {
-		return nil, err
-	}
-	//Since the key is in string, we need to convert decode it to bytes
-	externalKey, err := hex.DecodeString(eKey)
-	if err != nil {
-		return nil, err
-	}
-	c.eKey = externalKey
 	return c, nil
 }
