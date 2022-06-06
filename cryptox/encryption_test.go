@@ -74,7 +74,8 @@ func TestEncryptDecrypt(t *testing.T) {
 		// insert new external and external key
 		key, err := GenerateSymmetricKey(32, runes)
 		assert.NoError(t, err)
-		c, err = New([]string{internalKey, key}, []string{externalKey, key})
+		assert.NoError(t, c.SetInternalEncryptionKeys([]string{internalKey, key}))
+		assert.NoError(t, c.SetExternalEncryptionKeys([]string{externalKey, key}))
 		assert.NoError(t, err)
 		assert.NoError(t, c.Decrypt(complexStruct))
 		assert.Equal(t, test1, complexStruct.One)

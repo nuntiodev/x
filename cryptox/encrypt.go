@@ -35,18 +35,18 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 				return err
 			}
 			// encrypt using internal keys
-			if len(c.IKeys) > 0 && stringx.Body != "" {
-				if err := c.encrypt(stringx, c.IKey); err != nil {
+			if len(c.iKeys) > 0 && stringx.Body != "" {
+				if err := c.encrypt(stringx, c.iKey); err != nil {
 					return err
 				}
-				stringx.InternalEncryptionLevel = int32(len(c.IKeys))
+				stringx.InternalEncryptionLevel = int32(len(c.iKeys))
 			}
 			// encrypt using external keys
-			if len(c.EKeys) > 0 && stringx.Body != "" {
-				if err := c.encrypt(stringx, c.EKey); err != nil {
+			if len(c.eKeys) > 0 && stringx.Body != "" {
+				if err := c.encrypt(stringx, c.eKey); err != nil {
 					return err
 				}
-				stringx.ExternalEncryptionLevel = int32(len(c.EKeys))
+				stringx.ExternalEncryptionLevel = int32(len(c.eKeys))
 			}
 			// update value in interface with new value
 			if typePtrStringx {

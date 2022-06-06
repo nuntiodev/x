@@ -14,6 +14,8 @@ type Crypto interface {
 	Encrypt(enc interface{}) error
 	Decrypt(dec interface{}) error
 	Upgradeble(val interface{}) (bool, error)
+	SetInternalEncryptionKeys(keys []string) error
+	SetExternalEncryptionKeys(keys []string) error
 }
 
 type Stringx struct {
@@ -23,16 +25,46 @@ type Stringx struct {
 }
 
 type defaultCrypto struct {
-	IKeys []string
-	EKeys []string
-	IKey  []byte
-	EKey  []byte
+	iKeys []string
+	eKeys []string
+	iKey  []byte
+	eKey  []byte
+}
+
+func (c *defaultCrypto) SetInternalEncryptionKeys(keys []string) error {
+	iKey, err := CombineSymmetricKeys(keys, len(keys))
+	if err != nil {
+		return err
+	}
+	//Since the key is in string, we need to convert decode it to bytes
+	internlKey, err := hex.DecodeString(iKey)
+	if err != nil {
+		return err
+	}
+	c.iKeys = keys
+	c.iKey = internlKey
+	return nil
+}
+
+func (c *defaultCrypto) SetExternalEncryptionKeys(keys []string) error {
+	eKey, err := CombineSymmetricKeys(keys, len(keys))
+	if err != nil {
+		return err
+	}
+	//Since the key is in string, we need to convert decode it to bytes
+	externalKey, err := hex.DecodeString(eKey)
+	if err != nil {
+		return err
+	}
+	c.eKeys = keys
+	c.eKey = externalKey
+	return nil
 }
 
 func New(iKeys, eKeys []string) (Crypto, error) {
 	c := &defaultCrypto{
-		IKeys: iKeys,
-		EKeys: eKeys,
+		iKeys: iKeys,
+		eKeys: eKeys,
 	}
 	iKey, err := CombineSymmetricKeys(iKeys, len(iKeys))
 	if err != nil {
@@ -43,7 +75,7 @@ func New(iKeys, eKeys []string) (Crypto, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.IKey = internlKey
+	c.iKey = internlKey
 	eKey, err := CombineSymmetricKeys(eKeys, len(eKeys))
 	if err != nil {
 		return nil, err
@@ -53,6 +85,6 @@ func New(iKeys, eKeys []string) (Crypto, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.EKey = externalKey
+	c.eKey = externalKey
 	return c, nil
 }

@@ -35,9 +35,9 @@ func (c *defaultCrypto) Decrypt(dec interface{}) error {
 			}
 			// order matters - need to be reverse of encryption order
 			// encrypt using external keys
-			if len(c.EKeys) > 0 && stringx.Body != "" {
+			if len(c.eKeys) > 0 && stringx.Body != "" {
 				// build new key of length stringx.internalEncryptionLevel
-				key, err := CombineSymmetricKeys(c.EKeys, int(stringx.ExternalEncryptionLevel))
+				key, err := CombineSymmetricKeys(c.eKeys, int(stringx.ExternalEncryptionLevel))
 				if err != nil {
 					return err
 				}
@@ -50,9 +50,9 @@ func (c *defaultCrypto) Decrypt(dec interface{}) error {
 				}
 			}
 			// encrypt using internal keys
-			if len(c.IKeys) > 0 && stringx.Body != "" {
+			if len(c.iKeys) > 0 && stringx.Body != "" {
 				// build new key of length stringx.internalEncryptionLevel
-				key, err := CombineSymmetricKeys(c.IKeys, int(stringx.InternalEncryptionLevel))
+				key, err := CombineSymmetricKeys(c.iKeys, int(stringx.InternalEncryptionLevel))
 				if err != nil {
 					return err
 				}
