@@ -2,6 +2,7 @@ package cryptox
 
 import (
 	"encoding/hex"
+	"strings"
 )
 
 const (
@@ -35,6 +36,11 @@ type defaultCrypto struct {
 }
 
 func (c *defaultCrypto) SetInternalEncryptionKeys(keys []string) error {
+	for index, key := range keys {
+		if strings.TrimSpace(key) == "" {
+			keys = append(keys[:index], keys[index+1:]...)
+		}
+	}
 	iKey, err := CombineSymmetricKeys(keys, len(keys))
 	if err != nil {
 		return err
@@ -50,6 +56,11 @@ func (c *defaultCrypto) SetInternalEncryptionKeys(keys []string) error {
 }
 
 func (c *defaultCrypto) SetExternalEncryptionKeys(keys []string) error {
+	for index, key := range keys {
+		if strings.TrimSpace(key) == "" {
+			keys = append(keys[:index], keys[index+1:]...)
+		}
+	}
 	eKey, err := CombineSymmetricKeys(keys, len(keys))
 	if err != nil {
 		return err
@@ -73,6 +84,16 @@ func (c *defaultCrypto) GetExternalEncryptionKeys() ([]string, string) {
 }
 
 func New(iKeys, eKeys []string) (Crypto, error) {
+	for index, key := range iKeys {
+		if strings.TrimSpace(key) == "" {
+			iKeys = append(iKeys[:index], iKeys[index+1:]...)
+		}
+	}
+	for index, key := range eKeys {
+		if strings.TrimSpace(key) == "" {
+			eKeys = append(eKeys[:index], eKeys[index+1:]...)
+		}
+	}
 	c := &defaultCrypto{
 		IKeys: iKeys,
 		EKeys: eKeys,
