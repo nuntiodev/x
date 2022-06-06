@@ -33,6 +33,9 @@ func (c *defaultCrypto) Decrypt(dec interface{}) error {
 			if err := json.Unmarshal(bytes, stringx); err != nil {
 				return err
 			}
+			if len(c.eKeys) == 0 && stringx.ExternalEncryptionLevel > 0 {
+				continue
+			}
 			// order matters - need to be reverse of encryption order
 			// encrypt using external keys
 			if len(c.eKeys) > 0 && stringx.Body != "" && stringx.ExternalEncryptionLevel > 0 {
