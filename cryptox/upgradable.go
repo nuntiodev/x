@@ -39,9 +39,12 @@ func (c *defaultCrypto) Upgradeble(enc interface{}) (bool, error) {
 			}
 		} else if reflect.Indirect(field).Kind() == reflect.Struct {
 			//recursive encryption todo: find a faster way
-			err := c.Encrypt(field.Interface())
+			upgradable, err := c.Upgradeble(field.Interface())
 			if err != nil {
 				return false, err
+			}
+			if upgradable {
+				return upgradable, nil
 			}
 			continue
 		}
