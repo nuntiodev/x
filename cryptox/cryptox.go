@@ -16,6 +16,8 @@ type Crypto interface {
 	Upgradeble(val interface{}) (bool, error)
 	SetInternalEncryptionKeys(keys []string) error
 	SetExternalEncryptionKeys(keys []string) error
+	GetInternalEncryptionKeys() ([]string, string)
+	GetExternalEncryptionKeys() ([]string, string)
 }
 
 type Stringx struct {
@@ -59,6 +61,14 @@ func (c *defaultCrypto) SetExternalEncryptionKeys(keys []string) error {
 	c.EKeys = keys
 	c.EKey = externalKey
 	return nil
+}
+
+func (c *defaultCrypto) GetInternalEncryptionKeys() ([]string, string) {
+	return c.IKeys, string(c.IKey)
+}
+
+func (c *defaultCrypto) GetExternalEncryptionKeys() ([]string, string) {
+	return c.EKeys, string(c.EKey)
 }
 
 func New(iKeys, eKeys []string) (Crypto, error) {
