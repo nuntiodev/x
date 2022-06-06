@@ -2,7 +2,6 @@ package cryptox
 
 import (
 	"encoding/hex"
-	"errors"
 	"strings"
 )
 
@@ -85,14 +84,14 @@ func (c *defaultCrypto) GetExternalEncryptionKeys() ([]string, string) {
 }
 
 func New(iKeys, eKeys []string) (Crypto, error) {
-	for _, key := range iKeys {
+	for index, key := range iKeys {
 		if strings.TrimSpace(key) == "" {
-			return nil, errors.New("cannot use empty key")
+			iKeys = append(iKeys[:index], iKeys[index+1:]...)
 		}
 	}
-	for _, key := range eKeys {
+	for index, key := range eKeys {
 		if strings.TrimSpace(key) == "" {
-			return nil, errors.New("cannot use empty key")
+			eKeys = append(eKeys[:index], eKeys[index+1:]...)
 		}
 	}
 	c := &defaultCrypto{
