@@ -21,7 +21,6 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 	}
 	// todo: make this async
 	for i := 0; i < v.NumField(); i++ {
-
 		field := v.Field(i)
 		// first check if type is struct -> encrypt children
 		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&Stringx{})
@@ -58,10 +57,7 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 			}
 		} else if reflect.Indirect(field).Kind() == reflect.Struct {
 			//recursive encryption todo: find a faster way
-			err := c.Encrypt(field.Interface())
-			if err != nil {
-				return err
-			}
+			c.Encrypt(field.Interface()) // do not catch err
 			continue
 		}
 	}
