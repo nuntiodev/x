@@ -75,11 +75,7 @@ func (c *defaultCrypto) Decrypt(dec interface{}) error {
 			}
 		} else if reflect.Indirect(field).Kind() == reflect.Struct {
 			//recursive encryption todo: find a faster way
-			err := c.Decrypt(field.Interface())
-			if err != nil {
-				return err
-			}
-			continue
+			c.Decrypt(field.Interface())
 		}
 	}
 	return nil
