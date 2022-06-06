@@ -12,7 +12,13 @@ import (
 )
 
 func (c *defaultCrypto) Encrypt(enc interface{}) error {
+	if reflect.ValueOf(enc).Type().Kind() != reflect.Ptr {
+		return errors.New("invalid value - needs to be a pointer to object")
+	}
 	v := reflect.Indirect(reflect.ValueOf(enc))
+	if v.CanSet() == false {
+		return errors.New("cannot update value in interface")
+	}
 	// todo: make this async
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
@@ -51,7 +57,8 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 			}
 		} else if reflect.Indirect(field).Kind() == reflect.Struct {
 			//recursive encryption todo: find a faster way
-			c.Encrypt(field.Interface()) // do not catch err
+			c.Encrypt(field.Interface()) // do not catch
+			continue
 		}
 	}
 	return nil
