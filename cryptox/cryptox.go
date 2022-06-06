@@ -2,7 +2,6 @@ package cryptox
 
 import (
 	"encoding/hex"
-	"encoding/json"
 )
 
 const (
@@ -23,27 +22,17 @@ type Stringx struct {
 	InternalEncryptionLevel int32  `json:"internal_encryption_level"`
 }
 
-func (s *Stringx) Marshal() ([]byte, error) {
-	return json.Marshal(s)
-}
-
-func Unmarshal(s []byte) (*Stringx, error) {
-	var resp Stringx
-	err := json.Unmarshal(s, &resp)
-	return &resp, err
-}
-
 type defaultCrypto struct {
-	iKeys []string
-	eKeys []string
-	iKey  []byte
-	eKey  []byte
+	IKeys []string
+	EKeys []string
+	IKey  []byte
+	EKey  []byte
 }
 
 func New(iKeys, eKeys []string) (Crypto, error) {
 	c := &defaultCrypto{
-		iKeys: iKeys,
-		eKeys: eKeys,
+		IKeys: iKeys,
+		EKeys: eKeys,
 	}
 	iKey, err := CombineSymmetricKeys(iKeys, len(iKeys))
 	if err != nil {
@@ -54,7 +43,7 @@ func New(iKeys, eKeys []string) (Crypto, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.iKey = internlKey
+	c.IKey = internlKey
 	eKey, err := CombineSymmetricKeys(eKeys, len(eKeys))
 	if err != nil {
 		return nil, err
@@ -64,6 +53,6 @@ func New(iKeys, eKeys []string) (Crypto, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.eKey = externalKey
+	c.EKey = externalKey
 	return c, nil
 }
