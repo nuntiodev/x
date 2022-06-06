@@ -7,6 +7,9 @@ import (
 
 func (c *defaultCrypto) EncryptionLevel(val interface{}) (int32, int32) {
 	v := reflect.Indirect(reflect.ValueOf(val))
+	if v.CanSet() == false {
+		return 0, 0
+	}
 	external := int32(0)
 	internal := int32(0)
 	// todo: make this async
