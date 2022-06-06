@@ -14,6 +14,7 @@ const (
 type Crypto interface {
 	Encrypt(enc interface{}) error
 	Decrypt(dec interface{}) error
+	Upgradeble(val interface{}) (bool, error)
 }
 
 type Stringx struct {

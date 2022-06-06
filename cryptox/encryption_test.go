@@ -71,6 +71,11 @@ func TestEncryptDecrypt(t *testing.T) {
 		assert.Equal(t, int32(1), complexStruct.Five.InternalEncryptionLevel)
 		assert.Equal(t, int32(1), complexStruct.Five.ExternalEncryptionLevel)
 		// decrypt
+		// insert new external and external key
+		key, err := GenerateSymmetricKey(32, runes)
+		assert.NoError(t, err)
+		c, err = New([]string{internalKey, key}, []string{externalKey, key})
+		assert.NoError(t, err)
 		assert.NoError(t, c.Decrypt(complexStruct))
 		assert.Equal(t, test1, complexStruct.One)
 		assert.Equal(t, test2, complexStruct.Two)
@@ -78,9 +83,25 @@ func TestEncryptDecrypt(t *testing.T) {
 		assert.Equal(t, heyo2, complexStruct.Three.Two.Body)
 		assert.Equal(t, heyo3, complexStruct.Four.Body)
 		assert.Equal(t, heyo4, complexStruct.Five.Body)
-		//decryptedCiphertext, err := c.Decrypt(ciphertext, key)
-		//assert.NoError(t, err)
-		//assert.Equal(t, plaintext, decryptedCiphertext)
+		// encrypt again with and check that level is upgraded
+		upgradable, err := c.Upgradeble(complexStruct)
+		assert.NoError(t, err)
+		assert.True(t, upgradable)
+		assert.NoError(t, c.Encrypt(complexStruct))
+		assert.Equal(t, test1, complexStruct.One)
+		assert.Equal(t, test2, complexStruct.Two)
+		assert.NotEqual(t, heyo1, complexStruct.Three.One.Body)
+		assert.NotEqual(t, heyo2, complexStruct.Three.Two.Body)
+		assert.NotEqual(t, heyo3, complexStruct.Four.Body)
+		assert.NotEqual(t, heyo4, complexStruct.Five.Body)
+		assert.Equal(t, int32(2), complexStruct.Three.One.InternalEncryptionLevel)
+		assert.Equal(t, int32(2), complexStruct.Three.One.ExternalEncryptionLevel)
+		assert.Equal(t, int32(2), complexStruct.Three.Two.InternalEncryptionLevel)
+		assert.Equal(t, int32(2), complexStruct.Three.Two.ExternalEncryptionLevel)
+		assert.Equal(t, int32(2), complexStruct.Four.InternalEncryptionLevel)
+		assert.Equal(t, int32(2), complexStruct.Four.ExternalEncryptionLevel)
+		assert.Equal(t, int32(2), complexStruct.Five.InternalEncryptionLevel)
+		assert.Equal(t, int32(2), complexStruct.Five.ExternalEncryptionLevel)
 	}
 }
 

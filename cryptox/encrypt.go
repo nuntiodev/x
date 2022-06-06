@@ -35,14 +35,14 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 				return err
 			}
 			// encrypt using internal keys
-			if len(c.iKeys) > 0 {
+			if len(c.iKeys) > 0 && stringx.Body != "" {
 				if err := c.encrypt(stringx, c.iKey); err != nil {
 					return err
 				}
 				stringx.InternalEncryptionLevel = int32(len(c.iKeys))
 			}
 			// encrypt using external keys
-			if len(c.eKeys) > 0 {
+			if len(c.eKeys) > 0 && stringx.Body != "" {
 				if err := c.encrypt(stringx, c.eKey); err != nil {
 					return err
 				}
