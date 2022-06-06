@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func (c *defaultCrypto) CombineSymmetricKeys(keys []string, level int) (string, error) {
+func CombineSymmetricKeys(keys []string, level int) (string, error) {
 	if len(keys) == 0 {
 		return "", errors.New("invalid number of keys 0")
 	} else if level > len(keys) {

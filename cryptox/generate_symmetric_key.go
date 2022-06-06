@@ -35,7 +35,7 @@ var (
 	}
 )
 
-func (c *defaultCrypto) GenerateSymmetricKey(length int, runes int) (string, error) {
+func GenerateSymmetricKey(length int, runes int) (string, error) {
 	runeSpecification, ok := allowedRunes[runes]
 	if !ok {
 		return "", fmt.Errorf("invalid runes not allowed %d", runes)

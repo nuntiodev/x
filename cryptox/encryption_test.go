@@ -1,36 +1,90 @@
 package cryptox
 
 import (
-	"encoding/hex"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+type InnerStruct struct {
+	One Stringx
+	Two *Stringx
+}
+
+type ComplexStruct struct {
+	One   string
+	Two   int32
+	Three *InnerStruct
+	Four  *Stringx
+	Five  Stringx
+}
+
 /*
 TestEncryptDecrypt generates all allowed keys and encrypts/decrypts the plaintext and makes sure the result is the same.
 */
 func TestEncryptDecrypt(t *testing.T) {
-	plaintext := "SomeVeryLongPlainTextWithSp€cialCharsAndNumb3rs"
-	c, err := New()
-	assert.NoError(t, err)
 	for runes, _ := range allowedRunes {
-		// generate key
-		key, err := c.GenerateSymmetricKey(32, runes)
+		// generate internal key
+		internalKey, err := GenerateSymmetricKey(32, runes)
 		assert.NoError(t, err)
-		assert.NotEmpty(t, key)
+		assert.NotEmpty(t, internalKey)
+		// generate external key
+		externalKey, err := GenerateSymmetricKey(32, runes)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, externalKey)
+
+		// setup cryptox
+		c, err := New([]string{internalKey}, []string{externalKey})
+		assert.NoError(t, err)
+		// create complex struct to encrypt
+		test1 := "Test 1"
+		test2 := int32(2)
+		heyo1 := "Heyo1"
+		heyo2 := "Heyo2"
+		heyo3 := "Heyo3"
+		heyo4 := "Heyo4"
+		complexStruct := &ComplexStruct{
+			One: test1,
+			Two: test2,
+			Three: &InnerStruct{
+				One: Stringx{Body: heyo1},
+				Two: &Stringx{Body: heyo2},
+			},
+			Four: &Stringx{Body: heyo3},
+			Five: Stringx{Body: heyo4},
+		}
 		// encrypt
-		ciphertext, err := c.Encrypt(plaintext, key)
-		assert.NoError(t, err)
-		assert.NotEqual(t, plaintext, ciphertext)
+		assert.NoError(t, c.Encrypt(complexStruct))
+		// assert not equal to original one
+		assert.Equal(t, test1, complexStruct.One)
+		assert.Equal(t, test2, complexStruct.Two)
+		assert.NotEqual(t, heyo1, complexStruct.Three.One.Body)
+		assert.NotEqual(t, heyo2, complexStruct.Three.Two.Body)
+		assert.NotEqual(t, heyo3, complexStruct.Four.Body)
+		assert.NotEqual(t, heyo4, complexStruct.Five.Body)
+		assert.Equal(t, int32(1), complexStruct.Three.One.InternalEncryptionLevel)
+		assert.Equal(t, int32(1), complexStruct.Three.One.ExternalEncryptionLevel)
+		assert.Equal(t, int32(1), complexStruct.Three.Two.InternalEncryptionLevel)
+		assert.Equal(t, int32(1), complexStruct.Three.Two.ExternalEncryptionLevel)
+		assert.Equal(t, int32(1), complexStruct.Four.InternalEncryptionLevel)
+		assert.Equal(t, int32(1), complexStruct.Four.ExternalEncryptionLevel)
+		assert.Equal(t, int32(1), complexStruct.Five.InternalEncryptionLevel)
+		assert.Equal(t, int32(1), complexStruct.Five.ExternalEncryptionLevel)
 		// decrypt
-		decryptedCiphertext, err := c.Decrypt(ciphertext, key)
-		assert.NoError(t, err)
-		assert.Equal(t, plaintext, decryptedCiphertext)
+		assert.NoError(t, c.Decrypt(complexStruct))
+		assert.Equal(t, test1, complexStruct.One)
+		assert.Equal(t, test2, complexStruct.Two)
+		assert.Equal(t, heyo1, complexStruct.Three.One.Body)
+		assert.Equal(t, heyo2, complexStruct.Three.Two.Body)
+		assert.Equal(t, heyo3, complexStruct.Four.Body)
+		assert.Equal(t, heyo4, complexStruct.Five.Body)
+		//decryptedCiphertext, err := c.Decrypt(ciphertext, key)
+		//assert.NoError(t, err)
+		//assert.Equal(t, plaintext, decryptedCiphertext)
 	}
 }
 
+/*
 func TestInvalidEncryptionLevel(t *testing.T) {
 	c, err := New()
 	keyOne, err := c.GenerateSymmetricKey(32, AlphaNum)
@@ -110,3 +164,4 @@ func TestGenerateNumberKey(t *testing.T) {
 	assert.NoError(t, err)
 	fmt.Println(string(dec))
 }
+*/
