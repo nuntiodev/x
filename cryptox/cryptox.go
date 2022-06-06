@@ -25,10 +25,10 @@ type Stringx struct {
 }
 
 type defaultCrypto struct {
-	iKeys []string
-	eKeys []string
-	iKey  []byte
-	eKey  []byte
+	IKeys []string
+	EKeys []string
+	IKey  []byte
+	EKey  []byte
 }
 
 func (c *defaultCrypto) SetInternalEncryptionKeys(keys []string) error {
@@ -41,8 +41,8 @@ func (c *defaultCrypto) SetInternalEncryptionKeys(keys []string) error {
 	if err != nil {
 		return err
 	}
-	c.iKeys = keys
-	c.iKey = internlKey
+	c.IKeys = keys
+	c.IKey = internlKey
 	return nil
 }
 
@@ -56,15 +56,15 @@ func (c *defaultCrypto) SetExternalEncryptionKeys(keys []string) error {
 	if err != nil {
 		return err
 	}
-	c.eKeys = keys
-	c.eKey = externalKey
+	c.EKeys = keys
+	c.EKey = externalKey
 	return nil
 }
 
 func New(iKeys, eKeys []string) (Crypto, error) {
 	c := &defaultCrypto{
-		iKeys: iKeys,
-		eKeys: eKeys,
+		IKeys: iKeys,
+		EKeys: eKeys,
 	}
 	if len(iKeys) > 0 {
 		iKey, err := CombineSymmetricKeys(iKeys, len(iKeys))
@@ -76,7 +76,7 @@ func New(iKeys, eKeys []string) (Crypto, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.iKey = internlKey
+		c.IKey = internlKey
 	}
 	if len(eKeys) > 0 {
 		eKey, err := CombineSymmetricKeys(eKeys, len(eKeys))
@@ -88,7 +88,7 @@ func New(iKeys, eKeys []string) (Crypto, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.eKey = externalKey
+		c.EKey = externalKey
 	}
 	return c, nil
 }

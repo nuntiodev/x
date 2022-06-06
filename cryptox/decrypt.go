@@ -33,14 +33,14 @@ func (c *defaultCrypto) Decrypt(dec interface{}) error {
 			if err := json.Unmarshal(bytes, stringx); err != nil {
 				return err
 			}
-			if len(c.eKeys) == 0 && stringx.ExternalEncryptionLevel > 0 {
+			if len(c.EKeys) == 0 && stringx.ExternalEncryptionLevel > 0 {
 				continue
 			}
 			// order matters - need to be reverse of encryption order
 			// encrypt using external keys
-			if len(c.eKeys) > 0 && stringx.Body != "" && stringx.ExternalEncryptionLevel > 0 {
+			if len(c.EKeys) > 0 && stringx.Body != "" && stringx.ExternalEncryptionLevel > 0 {
 				// build new key of length stringx.internalEncryptionLevel
-				key, err := CombineSymmetricKeys(c.eKeys, int(stringx.ExternalEncryptionLevel))
+				key, err := CombineSymmetricKeys(c.EKeys, int(stringx.ExternalEncryptionLevel))
 				if err != nil {
 					return err
 				}
@@ -53,9 +53,9 @@ func (c *defaultCrypto) Decrypt(dec interface{}) error {
 				}
 			}
 			// encrypt using internal keys
-			if len(c.iKeys) > 0 && stringx.Body != "" && stringx.InternalEncryptionLevel > 0 {
+			if len(c.IKeys) > 0 && stringx.Body != "" && stringx.InternalEncryptionLevel > 0 {
 				// build new key of length stringx.internalEncryptionLevel
-				key, err := CombineSymmetricKeys(c.iKeys, int(stringx.InternalEncryptionLevel))
+				key, err := CombineSymmetricKeys(c.IKeys, int(stringx.InternalEncryptionLevel))
 				if err != nil {
 					return err
 				}
