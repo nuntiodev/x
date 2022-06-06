@@ -19,7 +19,9 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 	if v.CanSet() == false {
 		return errors.New("cannot update value in interface")
 	}
+	// todo: make this async
 	for i := 0; i < v.NumField(); i++ {
+
 		field := v.Field(i)
 		// first check if type is struct -> encrypt children
 		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&Stringx{})
