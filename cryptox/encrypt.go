@@ -12,10 +12,13 @@ import (
 )
 
 func (c *defaultCrypto) Encrypt(enc interface{}) error {
-	if reflect.ValueOf(enc).Type().Kind() != reflect.Ptr {
-		return errors.New("invalid value - needs to be a pointer to object")
+	v := reflect.ValueOf(enc)
+	// If it's an interface or a pointer, unwrap it.
+	if v.Kind() == reflect.Ptr && v.Elem().Kind() == reflect.Struct {
+		v = v.Elem()
+	} else {
+		return errors.New("must be a struct type")
 	}
-	v := reflect.Indirect(reflect.ValueOf(enc))
 	if v.CanSet() == false {
 		return errors.New("cannot update value in interface")
 	}
