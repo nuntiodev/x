@@ -6,6 +6,7 @@ require (
 	github.com/ory/dockertest/v3 v3.8.1
 	go.mongodb.org/mongo-driver v1.9.0
 	go.uber.org/zap v1.21.0
+	google.golang.org/protobuf v1.26.0
 )
 
 require (

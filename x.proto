@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package x;
+
+option go_package = "./proto";
+
+message Stringx {
+	string body = 1;
+	int32 external_encryption_level = 2;
+	int32 internal_encryption_level = 3;
+}

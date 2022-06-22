@@ -3,6 +3,8 @@ package cryptox
 import (
 	"encoding/json"
 	"reflect"
+
+	"github.com/nuntiodev/x/proto"
 )
 
 func (c *defaultCrypto) EncryptionLevel(val interface{}) (int32, int32) {
@@ -16,11 +18,11 @@ func (c *defaultCrypto) EncryptionLevel(val interface{}) (int32, int32) {
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
 		// first check if type is struct -> encrypt children
-		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&Stringx{})
-		typeStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(Stringx{})
+		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&proto.Stringx{})
+		typeStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(proto.Stringx{})
 		if typePtrStringx || typeStringx {
 			// we accept types of Stringx or ptr Stringx
-			stringx := &Stringx{}
+			stringx := &proto.Stringx{}
 			bytes, err := json.Marshal(field.Interface())
 			if err != nil {
 				continue
