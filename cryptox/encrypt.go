@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-
-	"github.com/nuntiodev/x/proto"
 )
 
 func (c *defaultCrypto) Encrypt(enc interface{}) error {
@@ -25,11 +23,11 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
 		// first check if type is struct -> encrypt children
-		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&proto.Stringx{})
-		typeStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(proto.Stringx{})
+		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&Stringx{})
+		typeStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(Stringx{})
 		if typePtrStringx || typeStringx {
 			// we accept types of Stringx or ptr Stringx
-			stringx := &proto.Stringx{}
+			stringx := &Stringx{}
 			bytes, err := json.Marshal(field.Interface())
 			if err != nil {
 				return err
@@ -66,7 +64,7 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 	return nil
 }
 
-func (c *defaultCrypto) encrypt(enc *proto.Stringx, key []byte) error {
+func (c *defaultCrypto) encrypt(enc *Stringx, key []byte) error {
 	if enc == nil {
 		return errors.New("stringx is nil")
 	}

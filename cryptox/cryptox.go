@@ -23,6 +23,12 @@ type Crypto interface {
 	GetExternalEncryptionKeys() ([]string, string)
 }
 
+type Stringx struct {
+	Body                    string `json:"body"`
+	ExternalEncryptionLevel int32  `json:"external_encryption_level"`
+	InternalEncryptionLevel int32  `json:"internal_encryption_level"`
+}
+
 type defaultCrypto struct {
 	IKeys []string
 	EKeys []string

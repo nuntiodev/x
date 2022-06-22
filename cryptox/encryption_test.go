@@ -3,21 +3,20 @@ package cryptox
 import (
 	"testing"
 
-	"github.com/nuntiodev/x/proto"
 	"github.com/stretchr/testify/assert"
 )
 
 type InnerStruct struct {
-	One proto.Stringx
-	Two *proto.Stringx
+	One Stringx
+	Two *Stringx
 }
 
 type ComplexStruct struct {
 	One   string
 	Two   int32
 	Three *InnerStruct
-	Four  *proto.Stringx
-	Five  proto.Stringx
+	Four  *Stringx
+	Five  Stringx
 }
 
 /*
@@ -48,11 +47,11 @@ func TestEncryptDecrypt(t *testing.T) {
 			One: test1,
 			Two: test2,
 			Three: &InnerStruct{
-				One: proto.Stringx{Body: heyo1},
-				Two: &proto.Stringx{Body: heyo2},
+				One: Stringx{Body: heyo1},
+				Two: &Stringx{Body: heyo2},
 			},
-			Four: &proto.Stringx{Body: heyo3},
-			Five: proto.Stringx{Body: heyo4},
+			Four: &Stringx{Body: heyo3},
+			Five: Stringx{Body: heyo4},
 		}
 		// encrypt
 		assert.NoError(t, c.Encrypt(complexStruct))
@@ -129,11 +128,11 @@ func TestEncryptDecryptOnlyInternal(t *testing.T) {
 			One: test1,
 			Two: test2,
 			Three: &InnerStruct{
-				One: proto.Stringx{Body: heyo1},
+				One: Stringx{Body: heyo1},
 				Two: nil,
 			},
-			Four: &proto.Stringx{Body: heyo3},
-			Five: proto.Stringx{Body: heyo4},
+			Four: &Stringx{Body: heyo3},
+			Five: Stringx{Body: heyo4},
 		}
 		// encrypt
 		assert.NoError(t, c.Encrypt(complexStruct))
@@ -213,11 +212,11 @@ func TestEncryptDecryptOnlyExternal(t *testing.T) {
 			One: test1,
 			Two: test2,
 			Three: &InnerStruct{
-				One: proto.Stringx{Body: heyo1},
-				Two: &proto.Stringx{Body: heyo2},
+				One: Stringx{Body: heyo1},
+				Two: &Stringx{Body: heyo2},
 			},
 			Four: nil,
-			Five: proto.Stringx{Body: heyo4},
+			Five: Stringx{Body: heyo4},
 		}
 		// encrypt
 		assert.NoError(t, c.Encrypt(complexStruct))
@@ -292,11 +291,11 @@ func TestEncryptDecryptNoKeys(t *testing.T) {
 		One: test1,
 		Two: test2,
 		Three: &InnerStruct{
-			One: proto.Stringx{Body: heyo1},
-			Two: &proto.Stringx{Body: heyo2},
+			One: Stringx{Body: heyo1},
+			Two: &Stringx{Body: heyo2},
 		},
-		Four: &proto.Stringx{Body: heyo3},
-		Five: proto.Stringx{Body: heyo4},
+		Four: &Stringx{Body: heyo3},
+		Five: Stringx{Body: heyo4},
 	}
 	// encrypt
 	assert.NoError(t, c.Encrypt(complexStruct))

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
-
-	"github.com/nuntiodev/x/proto"
 )
 
 func (c *defaultCrypto) Upgradeble(enc interface{}) (bool, error) {
@@ -19,11 +17,11 @@ func (c *defaultCrypto) Upgradeble(enc interface{}) (bool, error) {
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
 		// first check if type is struct -> encrypt children
-		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&proto.Stringx{})
-		typeStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(proto.Stringx{})
+		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&Stringx{})
+		typeStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(Stringx{})
 		if typePtrStringx || typeStringx {
 			// we accept types of Stringx or ptr Stringx
-			stringx := &proto.Stringx{}
+			stringx := &Stringx{}
 			bytes, err := json.Marshal(field.Interface())
 			if err != nil {
 				return false, err
