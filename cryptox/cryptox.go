@@ -1,6 +1,7 @@
 package cryptox
 
 import (
+	"crypto/rsa"
 	"encoding/hex"
 	"strings"
 )
@@ -17,32 +18,30 @@ type Crypto interface {
 	SetZero(val interface{}) error
 	Upgradeble(val interface{}) (bool, error)
 	EncryptionLevel(val interface{}) (int32, int32)
-	SetInternalEncryptionKeys(keys []string) error
-	SetExternalEncryptionKeys(keys []string) error
-	GetInternalEncryptionKeys() ([]string, string)
-	GetExternalEncryptionKeys() ([]string, string)
+	SetSymmetricEncryptionKeys(SymmetricKeys []string) error
+	GetSymmetricEncryptionKeys() ([]string, string)
 }
 
 type Stringx struct {
-	Body                    string `json:"body"`
-	ExternalEncryptionLevel int32  `json:"external_encryption_level"`
-	InternalEncryptionLevel int32  `json:"internal_encryption_level"`
+	Body               string `json:"body"`
+	EncryptionLevel    int32  `json:"encryption_level"`
+	PublicKeyEncrypted bool   `json:"public_key_encrypted"`
 }
 
 type defaultCrypto struct {
-	IKeys []string
-	EKeys []string
-	IKey  []byte
-	EKey  []byte
+	SymmetricKeys []string
+	SymmetricKey  []byte
+	PublicKey     *rsa.PublicKey
+	PrivateKey    *rsa.PrivateKey
 }
 
-func (c *defaultCrypto) SetInternalEncryptionKeys(keys []string) error {
-	for index, key := range keys {
+func (c *defaultCrypto) SetSymmetricEncryptionKeys(SymmetricKeys []string) error {
+	for index, key := range SymmetricKeys {
 		if strings.TrimSpace(key) == "" {
-			keys = append(keys[:index], keys[index+1:]...)
+			SymmetricKeys = append(SymmetricKeys[:index], SymmetricKeys[index+1:]...)
 		}
 	}
-	iKey, err := CombineSymmetricKeys(keys, len(keys))
+	iKey, err := CombineSymmetricSymmetricKeys(SymmetricKeys, len(SymmetricKeys))
 	if err != nil {
 		return err
 	}
@@ -51,77 +50,37 @@ func (c *defaultCrypto) SetInternalEncryptionKeys(keys []string) error {
 	if err != nil {
 		return err
 	}
-	c.IKeys = keys
-	c.IKey = internlKey
+	c.SymmetricKeys = SymmetricKeys
+	c.SymmetricKey = internlKey
 	return nil
 }
 
-func (c *defaultCrypto) SetExternalEncryptionKeys(keys []string) error {
-	for index, key := range keys {
-		if strings.TrimSpace(key) == "" {
-			keys = append(keys[:index], keys[index+1:]...)
-		}
-	}
-	eKey, err := CombineSymmetricKeys(keys, len(keys))
-	if err != nil {
-		return err
-	}
-	//Since the key is in string, we need to convert decode it to bytes
-	externalKey, err := hex.DecodeString(eKey)
-	if err != nil {
-		return err
-	}
-	c.EKeys = keys
-	c.EKey = externalKey
-	return nil
+func (c *defaultCrypto) GetSymmetricEncryptionKeys() ([]string, string) {
+	return c.SymmetricKeys, string(c.SymmetricKey)
 }
 
-func (c *defaultCrypto) GetInternalEncryptionKeys() ([]string, string) {
-	return c.IKeys, string(c.IKey)
-}
-
-func (c *defaultCrypto) GetExternalEncryptionKeys() ([]string, string) {
-	return c.EKeys, string(c.EKey)
-}
-
-func New(iKeys, eKeys []string) (Crypto, error) {
-	for index, key := range iKeys {
+func New(symmetricKeys []string, publicKey *rsa.PublicKey, privateKey *rsa.PrivateKey) (Crypto, error) {
+	for index, key := range symmetricKeys {
 		if strings.TrimSpace(key) == "" {
-			iKeys = append(iKeys[:index], iKeys[index+1:]...)
-		}
-	}
-	for index, key := range eKeys {
-		if strings.TrimSpace(key) == "" {
-			eKeys = append(eKeys[:index], eKeys[index+1:]...)
+			symmetricKeys = append(symmetricKeys[:index], symmetricKeys[index+1:]...)
 		}
 	}
 	c := &defaultCrypto{
-		IKeys: iKeys,
-		EKeys: eKeys,
+		SymmetricKeys: symmetricKeys,
+		PublicKey:     publicKey,
+		PrivateKey:    privateKey,
 	}
-	if len(iKeys) > 0 {
-		iKey, err := CombineSymmetricKeys(iKeys, len(iKeys))
+	if len(symmetricKeys) > 0 {
+		iKey, err := CombineSymmetricSymmetricKeys(symmetricKeys, len(symmetricKeys))
 		if err != nil {
 			return nil, err
 		}
 		//Since the key is in string, we need to convert decode it to bytes
-		internlKey, err := hex.DecodeString(iKey)
+		key, err := hex.DecodeString(iKey)
 		if err != nil {
 			return nil, err
 		}
-		c.IKey = internlKey
-	}
-	if len(eKeys) > 0 {
-		eKey, err := CombineSymmetricKeys(eKeys, len(eKeys))
-		if err != nil {
-			return nil, err
-		}
-		//Since the key is in string, we need to convert decode it to bytes
-		externalKey, err := hex.DecodeString(eKey)
-		if err != nil {
-			return nil, err
-		}
-		c.EKey = externalKey
+		c.SymmetricKey = key
 	}
 	return c, nil
 }

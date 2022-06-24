@@ -4,6 +4,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,19 +37,28 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 			if err := json.Unmarshal(bytes, stringx); err != nil {
 				return err
 			}
-			// encrypt using internal keys
-			if len(c.IKeys) > 0 && stringx.Body != "" {
-				if err := c.encrypt(stringx, c.IKey); err != nil {
+			// encrypt using public key first
+			if c.PublicKey != nil {
+				encryptedBytes, err := rsa.EncryptOAEP(
+					sha256.New(),
+					rand.Reader,
+					c.PublicKey,
+					[]byte(stringx.Body),
+					nil)
+				if err != nil {
 					return err
 				}
-				stringx.InternalEncryptionLevel = int32(len(c.IKeys))
+				stringx.Body = string(encryptedBytes)
+				stringx.PublicKeyEncrypted = true
+			} else {
+				stringx.PublicKeyEncrypted = false
 			}
-			// encrypt using external keys
-			if len(c.EKeys) > 0 && stringx.Body != "" {
-				if err := c.encrypt(stringx, c.EKey); err != nil {
+			// encrypt using symmetric keys
+			if len(c.SymmetricKeys) > 0 && stringx.Body != "" {
+				if err := c.encrypt(stringx, c.SymmetricKey); err != nil {
 					return err
 				}
-				stringx.ExternalEncryptionLevel = int32(len(c.EKeys))
+				stringx.EncryptionLevel = int32(len(c.SymmetricKeys))
 			}
 			// update value in interface with new value
 			if typePtrStringx {

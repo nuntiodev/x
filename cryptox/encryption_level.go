@@ -28,11 +28,8 @@ func (c *defaultCrypto) EncryptionLevel(val interface{}) (int32, int32) {
 			if err := json.Unmarshal(bytes, stringx); err != nil {
 				continue
 			}
-			if stringx.ExternalEncryptionLevel > external {
-				external = stringx.ExternalEncryptionLevel
-			}
-			if stringx.InternalEncryptionLevel > internal {
-				internal = stringx.InternalEncryptionLevel
+			if stringx.EncryptionLevel > internal {
+				internal = stringx.EncryptionLevel
 			}
 		} else if reflect.Indirect(field).Kind() == reflect.Struct {
 			//recursive encryption todo: find a faster way

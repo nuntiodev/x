@@ -1,8 +1,10 @@
 package cryptox
 
 import (
+	"crypto"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/rsa"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -33,39 +35,27 @@ func (c *defaultCrypto) Decrypt(dec interface{}) error {
 			if err := json.Unmarshal(bytes, stringx); err != nil {
 				return err
 			}
-			if len(c.EKeys) == 0 && stringx.ExternalEncryptionLevel > 0 {
-				continue
-			}
-			// order matters - need to be reverse of encryption order
-			// encrypt using external keys
-			if len(c.EKeys) > 0 && stringx.Body != "" && stringx.ExternalEncryptionLevel > 0 {
-				// build new key of length stringx.internalEncryptionLevel
-				key, err := CombineSymmetricKeys(c.EKeys, int(stringx.ExternalEncryptionLevel))
+			// encrypt using  symmetric Keys
+			if len(c.SymmetricKeys) > 0 && stringx.Body != "" && stringx.EncryptionLevel > 0 {
+				// build new key of length stringx encryption level
+				key, err := CombineSymmetricSymmetricKeys(c.SymmetricKeys, int(stringx.EncryptionLevel))
 				if err != nil {
 					return err
 				}
-				externalKey, err := hex.DecodeString(key)
+				internalKey, err := hex.DecodeString(key)
 				if err != nil {
 					return err
 				}
-				if err := c.decrypt(stringx, externalKey); err != nil {
+				if err := c.decrypt(stringx, internalKey); err != nil {
 					return err
 				}
 			}
-			// encrypt using internal keys
-			if len(c.IKeys) > 0 && stringx.Body != "" && stringx.InternalEncryptionLevel > 0 {
-				// build new key of length stringx.internalEncryptionLevel
-				key, err := CombineSymmetricKeys(c.IKeys, int(stringx.InternalEncryptionLevel))
+			if c.PrivateKey != nil && stringx.Body != "" && stringx.PublicKeyEncrypted == true {
+				decryptedBytes, err := c.PrivateKey.Decrypt(nil, []byte(stringx.Body), &rsa.OAEPOptions{Hash: crypto.SHA256})
 				if err != nil {
 					return err
 				}
-				internlKey, err := hex.DecodeString(key)
-				if err != nil {
-					return err
-				}
-				if err := c.decrypt(stringx, internlKey); err != nil {
-					return err
-				}
+				stringx.Body = string(decryptedBytes)
 			}
 			// update value in interface with new value
 			if typePtrStringx {

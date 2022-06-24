@@ -30,11 +30,7 @@ func (c *defaultCrypto) Upgradeble(enc interface{}) (bool, error) {
 				return false, err
 			}
 			// check internal level
-			if stringx.Body != "" && len(c.IKeys) > int(stringx.InternalEncryptionLevel) {
-				return true, nil
-			}
-			// check external level
-			if stringx.Body != "" && len(c.EKeys) > int(stringx.ExternalEncryptionLevel) {
+			if stringx.Body != "" && len(c.SymmetricKeys) > int(stringx.EncryptionLevel) {
 				return true, nil
 			}
 		} else if reflect.Indirect(field).Kind() == reflect.Struct {

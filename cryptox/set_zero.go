@@ -30,8 +30,7 @@ func (c *defaultCrypto) SetZero(enc interface{}) error {
 			if err := json.Unmarshal(bytes, stringx); err != nil {
 				return err
 			}
-			stringx.ExternalEncryptionLevel = 0
-			stringx.InternalEncryptionLevel = 0
+			stringx.EncryptionLevel = 0
 			// update value in interface with new value
 			if typePtrStringx {
 				field.Set(reflect.ValueOf(stringx))

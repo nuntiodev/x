@@ -6,28 +6,28 @@ import (
 	"fmt"
 )
 
-func CombineSymmetricKeys(keys []string, level int) (string, error) {
-	if len(keys) == 0 {
-		return "", errors.New("invalid number of keys 0")
-	} else if level > len(keys) {
-		return "", errors.New("level cannot be larger than amount of encryption keys")
+func CombineSymmetricSymmetricKeys(SymmetricKeys []string, level int) (string, error) {
+	if len(SymmetricKeys) == 0 {
+		return "", errors.New("invalid number of SymmetricKeys 0")
+	} else if level > len(SymmetricKeys) {
+		return "", errors.New("level cannot be larger than amount of encryption SymmetricKeys")
 	} else if level <= 0 {
 		return "", errors.New("level cannot be less than 0")
 	}
-	if len(keys) == 1 && level == 1 {
-		return keys[0], nil
+	if len(SymmetricKeys) == 1 && level == 1 {
+		return SymmetricKeys[0], nil
 	}
 	// validate length is the same
-	key, err := hex.DecodeString(keys[0])
+	key, err := hex.DecodeString(SymmetricKeys[0])
 	if err != nil {
 		return "", err
 	}
 	initialKey := string(key)
 	for i := 1; i < level; i++ {
-		if len(keys[i]) != 64 {
-			return "", fmt.Errorf("invalid key size: %d", len(keys[i]))
+		if len(SymmetricKeys[i]) != 64 {
+			return "", fmt.Errorf("invalid key size: %d", len(SymmetricKeys[i]))
 		}
-		key, err := hex.DecodeString(keys[i])
+		key, err := hex.DecodeString(SymmetricKeys[i])
 		if err != nil {
 			return "", err
 		}
@@ -45,4 +45,4 @@ func CombineSymmetricKeys(keys []string, level int) (string, error) {
 	return newKey, nil
 }
 
-// todo: make some distribution over keys to validate randomness
+// todo: make some distribution over SymmetricKeys to validate randomness
