@@ -18,6 +18,6 @@ func CreateDatabase(zapLog *zap.Logger) (*Database, error) {
 	}, nil
 }
 
-func (db *Database) CreateMongoClient(ctx context.Context) (*mongo.Client, error) {
-	return mongo_client.CreateMongoClient(ctx, db.zapLog)
+func (db *Database) CreateMongoClient(ctx context.Context, retry *int) (*mongo.Client, error) {
+	return mongo_client.CreateMongoClient(ctx, db.zapLog, retry)
 }
