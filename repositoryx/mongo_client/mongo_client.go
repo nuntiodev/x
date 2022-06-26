@@ -47,7 +47,7 @@ func CreateMongoClient(ctx context.Context, zapLog *zap.Logger, retry *int) (*mo
 		return nil, err
 	}
 	withRetry := 1
-	if retry != nil {
+	if retry != nil && *retry > 0 {
 		withRetry = *retry
 	}
 	// either specify uri or user, host and password
