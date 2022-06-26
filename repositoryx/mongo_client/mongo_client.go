@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/nuntiodev/x/retryx"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
@@ -39,19 +41,30 @@ func initializeMongoClient() error {
 	return nil
 }
 
-func CreateMongoClient(ctx context.Context, zapLog *zap.Logger) (*mongo.Client, error) {
+func CreateMongoClient(ctx context.Context, zapLog *zap.Logger, retry *int) (*mongo.Client, error) {
 	zapLog.Info("trying to create mongo client...")
 	if err := initializeMongoClient(); err != nil {
 		return nil, err
+	}
+	withRetry := 1
+	if retry != nil {
+		withRetry = *retry
 	}
 	// either specify uri or user, host and password
 	if mongoUri == "" {
 		mongoUri = fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", mongoUser, mongoUserPassword, mongoHost)
 	}
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(
-		mongoUri,
-	))
-	if err != nil {
+	var client *mongo.Client
+	if err := retryx.Retry(withRetry, time.Second*5, func() (err error) {
+		client, err = mongo.Connect(ctx, options.Client().ApplyURI(
+			mongoUri,
+		))
+		if err != nil {
+			zapLog.Error(fmt.Sprintf("could not connect to MongoDB with err: %v", err))
+			return err
+		}
+		return nil
+	}); err != nil {
 		zapLog.Error(fmt.Sprintf("could not connect to mongo with uri %s", mongoUri))
 		return nil, err
 	}
