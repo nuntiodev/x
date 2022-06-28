@@ -49,10 +49,6 @@ func initializeAuth() error {
 	if !ok || hydraPublicUrl == "" {
 		return errors.New("missing required HYDRA_PUBLIC_URL")
 	}
-	nuntioCloudId, ok = os.LookupEnv("NUNTIO_CLOUD_ID")
-	if !ok || nuntioCloudId == "" {
-		return errors.New("missing required NUNTIO_CLOUD_ID")
-	}
 	return nil
 }
 
