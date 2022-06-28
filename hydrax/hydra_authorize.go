@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/MicahParks/keyfunc"
@@ -14,11 +13,6 @@ import (
 	"github.com/ory/hydra-client-go/client"
 	"github.com/ory/hydra-client-go/client/public"
 	"go.uber.org/zap"
-)
-
-var (
-	hydraPublicUrl = ""
-	nuntioCloudId  = ""
 )
 
 type HydraResponse struct {
@@ -38,25 +32,14 @@ type Authorize interface {
 }
 
 type defaultAuth struct {
-	zapLog      *zap.Logger
-	hydraClient *client.OryHydra
-	jwks        *keyfunc.JWKS
+	logger         *zap.Logger
+	hydraClient    *client.OryHydra
+	jwks           *keyfunc.JWKS
+	hydraPublicUrl string
 }
 
-func initializeAuth() error {
-	var ok bool
-	hydraPublicUrl, ok = os.LookupEnv("HYDRA_PUBLIC_URL")
-	if !ok || hydraPublicUrl == "" {
-		return errors.New("missing required HYDRA_PUBLIC_URL")
-	}
-	return nil
-}
-
-func New(ctx context.Context, zapLog *zap.Logger) (Authorize, error) {
-	zapLog.Info("creating auth module")
-	if err := initializeAuth(); err != nil {
-		return nil, err
-	}
+func New(ctx context.Context, hydraPublicUrl string, logger *zap.Logger) (Authorize, error) {
+	logger.Info("creating hydra auth module")
 	publicUrl, err := url.Parse(hydraPublicUrl)
 	if err != nil {
 		return nil, err
@@ -101,9 +84,10 @@ func New(ctx context.Context, zapLog *zap.Logger) (Authorize, error) {
 		return nil, err
 	}
 	defaultAuth := &defaultAuth{
-		zapLog:      zapLog,
-		hydraClient: hydraClient,
-		jwks:        jwks,
+		logger:         logger,
+		hydraClient:    hydraClient,
+		jwks:           jwks,
+		hydraPublicUrl: hydraPublicUrl,
 	}
 	return defaultAuth, nil
 }
