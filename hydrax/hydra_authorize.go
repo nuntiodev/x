@@ -1,4 +1,4 @@
-package cloud_authorize
+package hydrax
 
 import (
 	"context"
@@ -21,15 +21,16 @@ var (
 	nuntioCloudId  = ""
 )
 
-type HeraResponse struct {
+type HydraResponse struct {
 	Id    string `json:"id"`
 	Email string `json:"email"`
+	Image string `json:"image"`
 }
 
 type UserInfoResponse struct {
-	Aud  []string     `json:"aud"`
-	Iss  string       `json:"iss"`
-	User HeraResponse `json:"user"`
+	Aud  []string      `json:"aud"`
+	Iss  string        `json:"iss"`
+	User HydraResponse `json:"user"`
 }
 
 type Authorize interface {
