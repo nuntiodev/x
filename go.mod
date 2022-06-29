@@ -6,7 +6,7 @@ require (
 	github.com/ory/dockertest/v3 v3.8.1
 	go.mongodb.org/mongo-driver v1.9.0
 	go.uber.org/zap v1.21.0
-	google.golang.org/protobuf v1.26.0
+	google.golang.org/protobuf v1.28.0
 )
 
 require (
@@ -30,7 +30,7 @@ require (
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
-	github.com/nuntiodev/hera-proto v0.2.84 // indirect
+	github.com/nuntiodev/hera-sdks v0.2.96 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opencontainers/runc v1.0.2 // indirect

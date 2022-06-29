@@ -9,7 +9,7 @@ import (
 
 	"github.com/MicahParks/keyfunc"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/nuntiodev/hera-proto/go_hera"
+	"github.com/nuntiodev/hera-sdks/go_hera"
 	"github.com/ory/hydra-client-go/client"
 	"github.com/ory/hydra-client-go/client/public"
 	"go.uber.org/zap"
