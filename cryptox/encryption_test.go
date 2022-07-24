@@ -1,6 +1,7 @@
 package cryptox
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,6 +18,8 @@ type ComplexStruct struct {
 	Three *InnerStruct
 	Four  *Stringx
 	Five  Stringx
+	Six   map[string]Stringx
+	Seven map[string]*Stringx
 }
 
 /*
@@ -45,6 +48,14 @@ func TestEncryptDecrypt(t *testing.T) {
 		heyo2 := "Heyo2"
 		heyo3 := "Heyo3"
 		heyo4 := "Heyo4"
+		heyo6 := map[string]Stringx{
+			"one": {Body: "Test 1234"},
+			"two": {Body: "Test 12345"},
+		}
+		heyo7 := map[string]*Stringx{
+			"three": {Body: "Test 123456"},
+			"four":  {Body: "Test 1234567"},
+		}
 		complexStruct := &ComplexStruct{
 			One: test1,
 			Two: test2,
@@ -54,6 +65,14 @@ func TestEncryptDecrypt(t *testing.T) {
 			},
 			Four: &Stringx{Body: heyo3},
 			Five: Stringx{Body: heyo4},
+			Six: map[string]Stringx{
+				"one": {Body: "Test 1234"},
+				"two": {Body: "Test 12345"},
+			},
+			Seven: map[string]*Stringx{
+				"three": {Body: "Test 123456"},
+				"four":  {Body: "Test 1234567"},
+			},
 		}
 		// encrypt
 		assert.NoError(t, c.Encrypt(complexStruct))
@@ -64,6 +83,8 @@ func TestEncryptDecrypt(t *testing.T) {
 		assert.NotEqual(t, heyo2, complexStruct.Three.Two.Body)
 		assert.NotEqual(t, heyo3, complexStruct.Four.Body)
 		assert.NotEqual(t, heyo4, complexStruct.Five.Body)
+		assert.False(t, reflect.DeepEqual(heyo6, complexStruct.Six), heyo6)
+		assert.False(t, reflect.DeepEqual(heyo7, complexStruct.Seven))
 		assert.Equal(t, int32(1), complexStruct.Three.One.EncryptionLevel)
 		assert.Equal(t, int32(1), complexStruct.Three.Two.EncryptionLevel)
 		assert.Equal(t, int32(1), complexStruct.Four.EncryptionLevel)
@@ -84,7 +105,12 @@ func TestEncryptDecrypt(t *testing.T) {
 		assert.Equal(t, heyo2, complexStruct.Three.Two.Body)
 		assert.Equal(t, heyo3, complexStruct.Four.Body)
 		assert.Equal(t, heyo4, complexStruct.Five.Body)
-
+		for key, val := range complexStruct.Six {
+			assert.Equal(t, heyo6[key].Body, val.Body)
+		}
+		for key, val := range complexStruct.Seven {
+			assert.Equal(t, heyo7[key].Body, val.Body)
+		}
 		// encrypt again with and check that level is upgraded
 		upgradable, err = c.Upgradeble(complexStruct)
 		assert.NoError(t, err)

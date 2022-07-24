@@ -28,37 +28,13 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&Stringx{})
 		typeStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(Stringx{})
 		if typePtrStringx || typeStringx {
-			// we accept types of Stringx or ptr Stringx
-			stringx := &Stringx{}
 			bytes, err := json.Marshal(field.Interface())
 			if err != nil {
 				return err
 			}
-			if err := json.Unmarshal(bytes, stringx); err != nil {
+			stringx, err := c.createEncryptionStringx(bytes)
+			if err != nil {
 				return err
-			}
-			// encrypt using public key first
-			if c.PublicKey != nil {
-				encryptedBytes, err := rsa.EncryptOAEP(
-					sha256.New(),
-					rand.Reader,
-					c.PublicKey,
-					[]byte(stringx.Body),
-					nil)
-				if err != nil {
-					return err
-				}
-				stringx.Body = string(encryptedBytes)
-				stringx.PublicKeyEncrypted = true
-			} else {
-				stringx.PublicKeyEncrypted = false
-			}
-			// encrypt using symmetric keys
-			if len(c.SymmetricKeys) > 0 && stringx.Body != "" {
-				if err := c.encrypt(stringx, c.SymmetricKey); err != nil {
-					return err
-				}
-				stringx.EncryptionLevel = int32(len(c.SymmetricKeys))
 			}
 			// update value in interface with new value
 			if typePtrStringx {
@@ -70,9 +46,66 @@ func (c *defaultCrypto) Encrypt(enc interface{}) error {
 			//recursive encryption todo: find a faster way
 			c.Encrypt(field.Interface()) // do not catch
 			continue
+		} else if reflect.Indirect(field).Kind() == reflect.Map { // handle map type
+			mapTypePtrStringx := reflect.Indirect(field).Type().Elem() == reflect.TypeOf(&Stringx{})
+			mapTypeStringx := reflect.Indirect(field).Type().Elem() == reflect.TypeOf(Stringx{})
+			if mapTypePtrStringx || mapTypeStringx {
+				vMap := reflect.ValueOf(field.Interface())
+				iterator := vMap.MapRange()
+				for iterator.Next() {
+					mapValue := iterator.Value()
+					bytes, err := json.Marshal(mapValue.Interface())
+					if err != nil {
+						return err
+					}
+					stringx, err := c.createEncryptionStringx(bytes)
+					if err != nil {
+						return err
+					}
+					if mapTypePtrStringx {
+						vMap.SetMapIndex(reflect.ValueOf(iterator.Key().Interface()), reflect.ValueOf(stringx))
+					} else {
+						vMap.SetMapIndex(reflect.ValueOf(iterator.Key().Interface()), reflect.ValueOf(*stringx))
+					}
+				}
+			}
+		} else if reflect.Indirect(field).Kind() == reflect.Array {
+			// todo: implemet
 		}
 	}
 	return nil
+}
+
+func (c *defaultCrypto) createEncryptionStringx(bytes []byte) (*Stringx, error) {
+	// we accept types of Stringx or ptr Stringx
+	stringx := &Stringx{}
+	if err := json.Unmarshal(bytes, stringx); err != nil {
+		return nil, err
+	}
+	// encrypt using public key first
+	if c.PublicKey != nil {
+		encryptedBytes, err := rsa.EncryptOAEP(
+			sha256.New(),
+			rand.Reader,
+			c.PublicKey,
+			[]byte(stringx.Body),
+			nil)
+		if err != nil {
+			return nil, err
+		}
+		stringx.Body = string(encryptedBytes)
+		stringx.PublicKeyEncrypted = true
+	} else {
+		stringx.PublicKeyEncrypted = false
+	}
+	// encrypt using symmetric keys
+	if len(c.SymmetricKeys) > 0 && stringx.Body != "" {
+		if err := c.encrypt(stringx, c.SymmetricKey); err != nil {
+			return nil, err
+		}
+		stringx.EncryptionLevel = int32(len(c.SymmetricKeys))
+	}
+	return stringx, nil
 }
 
 func (c *defaultCrypto) encrypt(enc *Stringx, key []byte) error {

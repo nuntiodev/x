@@ -26,36 +26,13 @@ func (c *defaultCrypto) Decrypt(dec interface{}) error {
 		typePtrStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(&Stringx{})
 		typeStringx := reflect.TypeOf(field.Interface()) == reflect.TypeOf(Stringx{})
 		if typePtrStringx || typeStringx {
-			// we accept types of Stringx or ptr Stringx
-			stringx := &Stringx{}
 			bytes, err := json.Marshal(field.Interface())
 			if err != nil {
 				return err
 			}
-			if err := json.Unmarshal(bytes, stringx); err != nil {
+			stringx, err := c.createDecryptionStringx(bytes)
+			if err != nil {
 				return err
-			}
-			// encrypt using  symmetric Keys
-			if len(c.SymmetricKeys) > 0 && stringx.Body != "" && stringx.EncryptionLevel > 0 {
-				// build new key of length stringx encryption level
-				key, err := CombineSymmetricSymmetricKeys(c.SymmetricKeys, int(stringx.EncryptionLevel))
-				if err != nil {
-					return err
-				}
-				internalKey, err := hex.DecodeString(key)
-				if err != nil {
-					return err
-				}
-				if err := c.decrypt(stringx, internalKey); err != nil {
-					return err
-				}
-			}
-			if c.PrivateKey != nil && stringx.Body != "" && stringx.PublicKeyEncrypted == true {
-				decryptedBytes, err := c.PrivateKey.Decrypt(nil, []byte(stringx.Body), &rsa.OAEPOptions{Hash: crypto.SHA256})
-				if err != nil {
-					return err
-				}
-				stringx.Body = string(decryptedBytes)
 			}
 			// update value in interface with new value
 			if typePtrStringx {
@@ -66,9 +43,62 @@ func (c *defaultCrypto) Decrypt(dec interface{}) error {
 		} else if reflect.Indirect(field).Kind() == reflect.Struct {
 			//recursive encryption todo: find a faster way
 			c.Decrypt(field.Interface())
+		} else if reflect.Indirect(field).Kind() == reflect.Map { // handle map type
+			mapTypePtrStringx := reflect.Indirect(field).Type().Elem() == reflect.TypeOf(&Stringx{})
+			mapTypeStringx := reflect.Indirect(field).Type().Elem() == reflect.TypeOf(Stringx{})
+			if mapTypePtrStringx || mapTypeStringx {
+				vMap := reflect.ValueOf(field.Interface())
+				iterator := vMap.MapRange()
+				for iterator.Next() {
+					mapValue := iterator.Value()
+					bytes, err := json.Marshal(mapValue.Interface())
+					if err != nil {
+						return err
+					}
+					stringx, err := c.createDecryptionStringx(bytes)
+					if err != nil {
+						return err
+					}
+					if mapTypePtrStringx {
+						vMap.SetMapIndex(reflect.ValueOf(iterator.Key().Interface()), reflect.ValueOf(stringx))
+					} else {
+						vMap.SetMapIndex(reflect.ValueOf(iterator.Key().Interface()), reflect.ValueOf(*stringx))
+					}
+				}
+			}
 		}
 	}
 	return nil
+}
+
+func (c *defaultCrypto) createDecryptionStringx(bytes []byte) (*Stringx, error) {
+	stringx := &Stringx{}
+	if err := json.Unmarshal(bytes, stringx); err != nil {
+		return nil, err
+	}
+	// encrypt using  symmetric Keys
+	if len(c.SymmetricKeys) > 0 && stringx.Body != "" && stringx.EncryptionLevel > 0 {
+		// build new key of length stringx encryption level
+		key, err := CombineSymmetricSymmetricKeys(c.SymmetricKeys, int(stringx.EncryptionLevel))
+		if err != nil {
+			return nil, err
+		}
+		internalKey, err := hex.DecodeString(key)
+		if err != nil {
+			return nil, err
+		}
+		if err := c.decrypt(stringx, internalKey); err != nil {
+			return nil, err
+		}
+	}
+	if c.PrivateKey != nil && stringx.Body != "" && stringx.PublicKeyEncrypted == true {
+		decryptedBytes, err := c.PrivateKey.Decrypt(nil, []byte(stringx.Body), &rsa.OAEPOptions{Hash: crypto.SHA256})
+		if err != nil {
+			return nil, err
+		}
+		stringx.Body = string(decryptedBytes)
+	}
+	return stringx, nil
 }
 
 func (c *defaultCrypto) decrypt(dec *Stringx, key []byte) error {

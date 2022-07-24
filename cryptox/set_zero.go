@@ -41,6 +41,30 @@ func (c *defaultCrypto) SetZero(enc interface{}) error {
 			//recursive encryption todo: find a faster way
 			c.SetZero(field.Interface()) // do not catch
 			continue
+		} else if reflect.Indirect(field).Kind() == reflect.Map { // handle map type
+			mapTypePtrStringx := reflect.Indirect(field).Type().Elem() == reflect.TypeOf(&Stringx{})
+			mapTypeStringx := reflect.Indirect(field).Type().Elem() == reflect.TypeOf(Stringx{})
+			if mapTypePtrStringx || mapTypeStringx {
+				vMap := reflect.ValueOf(field.Interface())
+				iterator := vMap.MapRange()
+				for iterator.Next() {
+					mapValue := iterator.Value()
+					bytes, err := json.Marshal(mapValue.Interface())
+					if err != nil {
+						return err
+					}
+					stringx := &Stringx{}
+					if err := json.Unmarshal(bytes, stringx); err != nil {
+						return err
+					}
+					stringx.EncryptionLevel = 0
+					if mapTypePtrStringx {
+						vMap.SetMapIndex(reflect.ValueOf(iterator.Key().Interface()), reflect.ValueOf(stringx))
+					} else {
+						vMap.SetMapIndex(reflect.ValueOf(iterator.Key().Interface()), reflect.ValueOf(*stringx))
+					}
+				}
+			}
 		}
 	}
 	return nil
