@@ -3,6 +3,7 @@ package hydrax
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/url"
 	"time"
@@ -111,6 +112,7 @@ func (da *defaultAuth) VerifyAndDecodeToken(accessToken string) (*go_hera.User, 
 	if !ok {
 		return nil, errors.New("userid is empty")
 	}
+	fmt.Println(claims)
 	return &go_hera.User{
 		Id: userId,
 		//Email: userInfoResp.User.Email,
