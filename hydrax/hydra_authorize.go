@@ -112,9 +112,10 @@ func (da *defaultAuth) VerifyAndDecodeToken(accessToken string) (*go_hera.User, 
 	if !ok {
 		return nil, errors.New("userid is empty")
 	}
+	email, _ := claims["email"].(string)
 	fmt.Println(claims)
 	return &go_hera.User{
-		Id: userId,
-		//Email: userInfoResp.User.Email,
+		Id:    userId,
+		Email: &email,
 	}, nil
 }
